@@ -5,27 +5,39 @@ pragma solidity 0.8.18;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import "./NFT.sol";
 
 
-contract NFTProxy is ClonesUpgradeable, UUPSUpgradeable, OwnableUpgradeable{
+contract NFTProxy is OwnableUpgradeable,UUPSUpgradeable{
 
     address private _nftImplementation;
 
     //Initialize the contract with the address of the implemnatation contract
-    function initialize(address nftImplementation) public initializer{
-        _nftImplementation = nftImplementation;
+    function initialize(address implementation) public initializer{
+        __Ownable_init();
+        _nftImplementation = implementation;
     }
+     
+     function upgradeImplementation(address newImplementation ) public onlyOwner{
+         _nftImplementation = newImplementation;
+     }
 
-    //Override the _authorizeUpgrade function to allow only the owner to upgrade the contract
-    function _authorizeUpgrade(address) internal override onlyOwner{}
+      // delegate calls to implementation contract
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    // Override the _upgradeTo function to set the address of the new implementation contract
-    function _upgradeTo(address newImplementation) internal override {
-        _implementation = newImplementation;
-    }
+    function _fallback() internal {
+        address implementation_ = _nftImplementation;
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(gas(), implementation_, 0, calldatasize(), 0, 0)
+            returndatacopy(0, 0, returndatasize())
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
 
-    // Override the _implementation function to return the address of the implementation contract
-    function _implementation() internal view override returns (address) {
-        return _implementation;
-    }
-}
+    }}
