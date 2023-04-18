@@ -22,13 +22,11 @@ contract NFTFactory is OwnableUpgradeable{
 
     function createNFT(string memory name, string memory symbol) public returns (address) {
         address nft = ClonesUpgradeable.clone(_nftImplementation);
-        // NFTProxy proxy = NFTProxy(payable(nft));
-        // proxy.initialize(_nftImplementation);
         NFT(nft).initialize(name, symbol);
+        NFTProxy proxy = new NFTProxy();
+        proxy.initialize(nft);
         emit nftCreated(nft);
-
-        // NFT(nft).initialize(name, symbol);
-        // deployedNfts.push(nft);
+        deployedNfts.push(nft);
         return nft;
     }
 }
