@@ -2,6 +2,7 @@ const {upgrades,ethers} = require("hardhat");
 
 describe("NFT",function(){
     let nft;
+    let nft2;
       before(async function(){
     [owner, addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
     const NFT = await ethers.getContractFactory("NFT");
@@ -29,15 +30,14 @@ describe("NFT",function(){
     const tx = await nftFactory.createNFT("ART", "ART");
    const receipt =  await tx.wait();
    const nftProxyAddress = receipt.events[4].args[0];
-   console.log(nftProxyAddress)
-    // nft = NFT.attach(nftProxyAddress);
+    nft = NFT.attach(nftProxyAddress);
 
-    await nftProxy.upgradeImplementation(nftImplementation2.address);
-    nft = NFT2.attach(nftProxyAddress);
-    console.log(nft)
-    // const implement  =  await upgrades.erc1967.getImplementationAddress(nftImplementation.address);
-    // console.log(implement)
-
+    const tx2 = await nftFactory.createNFT("ART2", "ART2");
+    const receipt2 =  await tx2.wait();
+    const nftProxyAddress2 = receipt2.events[4].args[0];
+     nft2 = NFT.attach(nftProxyAddress2);
+    // await nftProxy.upgradeImplementation(nftImplementation2.address);
+    
 
     console.log('NFTFactory deployed to:', nftFactory.address);
     console.log('NFT deployed to:', nftImplementation.address);
@@ -46,6 +46,8 @@ describe("NFT",function(){
     it("Should return the name and symbol of nft", async function(){
         assert.equal(await nft.name(), "ART");
         assert.equal(await nft.symbol(), "ART");
+        assert.equal(await nft2.name(),"ART2");
+        assert.equal(await nft2.symbol(),"ART2");
     })
     it("Should mint a new token", async function(){
       await nft.mintNft("https://ipfs.io/",addr2.address);
