@@ -8,10 +8,10 @@ describe("NFT",function(){
     const nftImplementation = await NFT.deploy();
     await nftImplementation.deployed();
 
-    // const NFT2 = await ethers.getContractFactory("NFT1");
-    // const nftImplementation2 = await NFT2.deploy();
-    // await nftImplementation2.deployed();
-    // console.log("second", nftImplementation2.address)
+    const NFT2 = await ethers.getContractFactory("NFT1");
+    const nftImplementation2 = await NFT2.deploy();
+    await nftImplementation2.deployed();
+    console.log("second", nftImplementation2.address)
     console.log("Deploying NFT Factory.........")
 
     const NFTProxy = await ethers.getContractFactory("NFTProxy");
@@ -32,8 +32,9 @@ describe("NFT",function(){
    console.log(nftProxyAddress)
     // nft = NFT.attach(nftProxyAddress);
 
-    // await nftProxy.upgradeImplementation(nftImplementation2.address);
-    nft = NFT.attach(nftProxyAddress);
+    await nftProxy.upgradeImplementation(nftImplementation2.address);
+    nft = NFT2.attach(nftProxyAddress);
+    console.log(nft)
     // const implement  =  await upgrades.erc1967.getImplementationAddress(nftImplementation.address);
     // console.log(implement)
 
